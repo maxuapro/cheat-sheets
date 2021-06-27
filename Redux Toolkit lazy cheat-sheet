@@ -1,0 +1,91 @@
+npm install @reduxjs/toolkit
+npm install react-redux
+@reduxjs/toolkit has redux itself inside, so no need to install redux
+First we need a slice, which is a set of data we are gonna be storing and also set of methods we are gonna be manipulating our data with in our app. 
+We can have multiple slices for different purposes.
+
+Import createSlice function
+
+import { createSlice } from '@reduxjs/toolkit'
+
+const initialCounterState = { counter: 0, showCounter: true }
+const sliceVariable = createSlice({
+   name: 'counter', 
+   initialState: initialCounterState,
+   reducers: {
+       increment(state) {
+           state.counter++
+       },
+       decrement(state) {
+           state.counter--
+       },
+       increase(state, action) {
+           state.counter = state.counter + action.payload
+       },
+       toggle(state) {
+           state.showCounter = !state.showCounter
+       }
+   }
+})
+export const counterActions = sliceVariable .actions
+export default sliceVariable.reducer
+
+here: name - IDK what's it for (look up here https://redux-toolkit.js.org/api/createSlice)
+initialCounterState - initial state (the state data)
+reducers - set of methods, each of them takes State and Action. State is obvoius - goes into method BY DEFAULT! 
+Doesn't need to be taken as a parameter when the method is called. Action - a parameter we are gonna be defining in Dispatch fuctions later in components
+------------------------------------------
+Next: create Store
+import { configureStore } from '@reduxjs/toolkit'
+import sliceVariable from './counter'
+
+const store = configureStore({
+    reducer: {
+        counter: sliceVariable ,
+    }
+})
+export default store
+
+----------------------------------------------------
+Next: let's give access to the entire app our redux functionality:
+
+In the index.js:
+
+import store from './store/index_redux'
+import { Provider } from 'react-redux'
+
+ReactDOM.render(
+   <Provider store={store}>
+      <App />
+   </Provider>,
+   document.getElementById('root')
+);
+---------------------------------------------------------
+Next: getting acces to the Store data and methods
+
+import { useSelector, useDispatch } from 'react-redux'  // hooks
+import { counterActions } from '../store/counter'
+
+to get data:
+const counter = useSelector(state => state.counter.counter)
+const show = useSelector(state => state.counter.showCounter)
+
+to change data:
+const dispatch = useDispatch()
+
+we can call our methods and alter the state by pushing counterActions.[method name]
+***arguments that methods get as parameters are our Action parameter difined in cretaeSlice method earlier!
+
+const increment = () => {
+    dispatch(counterActions.increment())
+  }
+const incrementByFive = () => {
+    dispatch(counterActions.increase(10))
+  }
+const decrement = () => {
+    dispatch(counterActions.decrement())
+  }
+const toggleCounterHandler = () => {
+    dispatch(counterActions.toggle())
+  }
+
